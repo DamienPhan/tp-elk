@@ -439,7 +439,257 @@ GET <index>/_search?size=10
 ```
 
 - (Question) Rechercher "Usage of artificial intelligence in medicine". Afficher les champs `headline`, `short_description`, `date` et `link`.
+GET news/_search?size=10
+{
+  "query": {
+    "neural": {
+      "text_embedding": {
+        "query_text": "Usage of artificial intelligence in medicine",
+        "model_id": "-Pnm1KEBixBHeLfjn2Ev",
+        "k": 10
+      }
+    }
+  },
+  "fields": ["headline", "short_description", "date", "link"],
+  "_source": false
+}
+
+GET news/_search
+{
+  "query": {"match": {"short_description": "Usage of artificial intelligence in medicine"}},
+  "_source": ["headline", "short_description"]
+}
+
+GET news/_search?q=short_description:"artificial intelligence" AND (medicine OR medical OR health OR doctors)
+
+
 - (Question) Rechercher les articles similaires à celui-ci https://www.huffpost.com/entry/15-comedy-documentaries-worth-watching-on-netflix-photos_n_1619966. Copier / coller le début de l'article dans la requête.
+
+GET news/_search?size=10
+{
+  "query": {
+    "neural": {
+      "text_embedding": {
+        "query_text": "15 Comedy Documentaries Worth Watching On Netflix. Netflix, to its credit, has a phenomenal archive of documentaries available to watch whenever you want. Even better, they",
+        "model_id": "-Pnm1KEBixBHeLfjn2Ev",
+        "k": 10
+      }
+    }
+  },
+  "fields": ["headline", "short_description", "date", "link"],
+  "_source": false
+}
+
+{
+  "took": 886,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 10,
+      "relation": "eq"
+    },
+    "max_score": 0.54733276,
+    "hits": [
+      {
+        "_index": "news",
+        "_id": "https://www.huffpost.com/entry/good-movies-netflix_l_5c740a76e4b00eed08376b23",
+        "_score": 0.54733276,
+        "fields": {
+          "date": [
+            "2019-02-25T00:00:00.000Z"
+          ],
+          "short_description": [
+            "Netflix adds a ton of classic movies this week."
+          ],
+          "link": [
+            "https://www.huffpost.com/entry/good-movies-netflix_l_5c740a76e4b00eed08376b23"
+          ],
+          "headline": [
+            "What To Watch On Netflix That’s New This Week (Feb. 25-March 3)"
+          ]
+        }
+      },
+      {
+        "_index": "news",
+        "_id": "https://www.huffpost.com/entry/netflix-films-2020-good-reviews_l_5f69fd1bc5b655acbc70111d",
+        "_score": 0.5298155,
+        "fields": {
+          "date": [
+            "2020-09-23T00:00:00.000Z"
+          ],
+          "short_description": [
+            "Most Netflix movies are mediocre; these aren't."
+          ],
+          "link": [
+            "https://www.huffpost.com/entry/netflix-films-2020-good-reviews_l_5f69fd1bc5b655acbc70111d"
+          ],
+          "headline": [
+            "10 Netflix Films From 2020 That Actually Got Good Reviews"
+          ]
+        }
+      },
+      {
+        "_index": "news",
+        "_id": "https://www.huffingtonpost.com/entry/good-movies-netflix_us_5af98954e4b0e57cd9fbb43f",
+        "_score": 0.5273218,
+        "fields": {
+          "date": [
+            "2018-05-14T00:00:00.000Z"
+          ],
+          "short_description": [
+            "Surprise! Netflix adds a pretty good sci-fi movie."
+          ],
+          "link": [
+            "https://www.huffingtonpost.com/entry/good-movies-netflix_us_5af98954e4b0e57cd9fbb43f"
+          ],
+          "headline": [
+            "Here Are The Movies Coming To Netflix This Week"
+          ]
+        }
+      },
+      {
+        "_index": "news",
+        "_id": "https://www.huffpost.com/entry/best-netflix-shows-stream_n_5b60bfb5e4b0de86f49ba4bd",
+        "_score": 0.49890485,
+        "fields": {
+          "date": [
+            "2018-08-04T00:00:00.000Z"
+          ],
+          "short_description": [
+            "Over a dozen Netflix Originals join the service."
+          ],
+          "link": [
+            "https://www.huffpost.com/entry/best-netflix-shows-stream_n_5b60bfb5e4b0de86f49ba4bd"
+          ],
+          "headline": [
+            "What To Watch On Netflix That’s New This Week"
+          ]
+        }
+      },
+      {
+        "_index": "news",
+        "_id": "https://www.huffpost.com/entry/best-netflix-stream-queer-eye_l_5c8994fbe4b038892f4a2d9d",
+        "_score": 0.4962824,
+        "fields": {
+          "date": [
+            "2019-03-16T00:00:00.000Z"
+          ],
+          "short_description": [
+            "One of Netflix’s best shows returns for another season."
+          ],
+          "link": [
+            "https://www.huffpost.com/entry/best-netflix-stream-queer-eye_l_5c8994fbe4b038892f4a2d9d"
+          ],
+          "headline": [
+            "What To Watch On Netflix That’s New This Week (March 10-16)"
+          ]
+        }
+      },
+      {
+        "_index": "news",
+        "_id": "https://www.huffpost.com/entry/movies-leaving-netflix-december_l_5fcfb3a7c5b619bc4c36534d",
+        "_score": 0.49548984,
+        "fields": {
+          "date": [
+            "2020-12-30T00:00:00.000Z"
+          ],
+          "short_description": [
+            """Movies including "Eternal Sunshine of the Spotless Mind," "Fargo" and "The Notebook" are leaving Netflix."""
+          ],
+          "link": [
+            "https://www.huffpost.com/entry/movies-leaving-netflix-december_l_5fcfb3a7c5b619bc4c36534d"
+          ],
+          "headline": [
+            "11 Movies Leaving Netflix At The End Of December 2020"
+          ]
+        }
+      },
+      {
+        "_index": "news",
+        "_id": "https://www.huffpost.com/entry/best-netflix-stream-the-oa_l_5c93ca8ae4b088a7df0569a0",
+        "_score": 0.49346477,
+        "fields": {
+          "date": [
+            "2019-03-23T00:00:00.000Z"
+          ],
+          "short_description": [
+            "One of Netflix's best shows of the year just debuted."
+          ],
+          "link": [
+            "https://www.huffpost.com/entry/best-netflix-stream-the-oa_l_5c93ca8ae4b088a7df0569a0"
+          ],
+          "headline": [
+            "What To Watch On Netflix That’s New This Week (March 17-23)"
+          ]
+        }
+      },
+      {
+        "_index": "news",
+        "_id": "https://www.huffingtonpost.com/entry/netflix-coming-may_us_5afaf0b5e4b09a94524c4180",
+        "_score": 0.48961112,
+        "fields": {
+          "date": [
+            "2018-05-16T00:00:00.000Z"
+          ],
+          "short_description": [
+            "Here are the shows you wouldn't have known were debuting if you'd only read Netflix's monthly list."
+          ],
+          "link": [
+            "https://www.huffingtonpost.com/entry/netflix-coming-may_us_5afaf0b5e4b09a94524c4180"
+          ],
+          "headline": [
+            "Here Are The Surprise Shows Coming To Netflix In May"
+          ]
+        }
+      },
+      {
+        "_index": "news",
+        "_id": "https://www.huffingtonpost.com/entry/queer-eye-season-two-dates_us_5b06dadee4b07c4ea10605d8",
+        "_score": 0.4888853,
+        "fields": {
+          "date": [
+            "2018-05-24T00:00:00.000Z"
+          ],
+          "short_description": [
+            "It's slated to hit Netflix on June 15th."
+          ],
+          "link": [
+            "https://www.huffingtonpost.com/entry/queer-eye-season-two-dates_us_5b06dadee4b07c4ea10605d8"
+          ],
+          "headline": [
+            "Can You Believe? Queer Eye Season 2 Drops Next Month"
+          ]
+        }
+      },
+      {
+        "_index": "news",
+        "_id": "https://www.huffpost.com/entry/best-netflix-shows-april-2020_l_5e86ac0dc5b63e06281b948c",
+        "_score": 0.4854415,
+        "fields": {
+          "date": [
+            "2020-04-05T00:00:00.000Z"
+          ],
+          "short_description": [
+            "Two wonderful comedies just debuted on Netflix: \"Middleditch & Schwartz\" and \"The Midnight Gospel.\""
+          ],
+          "link": [
+            "https://www.huffpost.com/entry/best-netflix-shows-april-2020_l_5e86ac0dc5b63e06281b948c"
+          ],
+          "headline": [
+            "The Best Shows To Watch On Netflix In April 2020"
+          ]
+        }
+      }
+    ]
+  }
+}
+
 
 # Partie 4 - Pour aller plus loin : Logstash
 Logstash est un formidable outil pour le traitement et l’ingestion de données, notamment dans OpenSearch.
