@@ -220,22 +220,79 @@ GET shakespeare/_search?q=query OR champ:query
 ```
 
 - (Question) Rechercher les documents contenant le terme KING dans les champs text_entry OU play_name. Accordez deux fois plus d’importance aux documents qui contiennent le terme dans le champ play_name (astuce : KING^2).
+GET shakespeare/_search?q=text_entry:KING OR play_name:KING^2
 - (Question) Rechercher les documents où l’orateur (champ speaker) CAESAR parle de Brutus (champ text_entry)
+GET shakespeare/_search?q=speaker:CAESAR AND text_entry:Brutus
 - (Question) Rechercher les documents où l’orateur(champ speaker) CAESAR ne parle PAS de Brutus (champ text_entry)
+GET shakespeare/_search?q=speaker:CAESAR AND NOT text_entry:Brutus
 - (Question) Rechercher les documents répondant à la requête `caesar brutus calpurnia`
+GET shakespeare/_search?q=caesar brutus calpurnia
 - (Question) Selon vous, pourquoi le quatrième document, qui contient tous les termes, n’est pas en première position ?
+Car c'est en fonction du score BM25. 
 - (Question) Modifier la requête pour que seul le quatrième document réponde.
+GET shakespeare/_search?q=caesar AND brutus AND calpurnia
 - (Question) Rechercher les documents répondant à la requête cesar (la faute est volontaire)
+GET shakespeare/_search?q=cesar
 - (Question) Pourquoi aucun document ne répond ?
-- (Question) Essayez maintenant avec la requête cesar~ 
+Car c'est de la recherche avec l'index inversé. cesar marche pas car le mot dans le dictionnaire est caesar. 
+- (Question) Essayez maintenant avec la requête cesar~
+GET shakespeare/_search?q=cesar~ 
 - (Question) En déduire le rôle de l’opérateur ~
+L'opérateur ~ permet de déclencher la recherche floue. 
 
 ### AGGREGATION API
 
 Documentation : https://docs.opensearch.org/latest/aggregations/ ou https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations.html (mieux expliqué mais attention à la compatibilité)
 
 - (Question) Trouver le nombre total de pièces (champ play_name)
+
+GET shakespeare/_search
+{
+  "size": 0,
+  "aggs": {
+    "nb_pieces": {"cardinality": {"field": "play_name.keyword"}}
+  }
+}
+
+{
+  "took": 158,
+  "timed_out": false,
+  "terminated_early": true,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 10000,
+      "relation": "gte"
+    },
+    "max_score": null,
+    "hits": []
+  },
+  "aggregations": {
+    "nb_pieces": {
+      "value": 36
+    }
+  }
+}
 - (Question) En une requête, calculer le nombre de lignes (champ line_id) pour chaque pièce (champ play_name)
+
+GET shakespeare/_search
+{
+  "size": 0,
+  "aggs": {
+    "par_piece": {
+      "terms": {"field": "play_name.keyword", "size": 36},
+      "aggs": {
+        "nb_lignes": {"value_count": {"field": "line_id"}}
+      }
+    }
+  }
+}
+
 
 # Partie 3 - Recherches sémantiques
 
