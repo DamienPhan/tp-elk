@@ -41,6 +41,28 @@ bridge
 
 - (Question) Étudiez le fichier `docker-compose.yml` en vous aidant de la documentation https://docs.opensearch.org/latest/install-and-configure/install-opensearch/docker/. Pour chaque service, expliquez son rôle, les ports exposés et les principaux paramètres (`discovery.type`, `node.roles`, `OPENSEARCH_JAVA_OPTS`, `healthcheck`, `depends_on`). Pourquoi la sécurité est-elle désactivée, et pourquoi ne faut-il jamais le faire en production ?
 
+- 3 services : 
+opensearch (port 9200): Moteur de recherche open-source pour des recherches de corpus de texte, la surveillance d'application, l'analyse de journaux et la recherche vectorielle. 
+logstash-oss (port 5601): Pipeline d'ingestion ETL
+opensearch-dashboards (port 5000): OpenSearch Dashboards fournit un visuel et une interface de gestion. 
+
+__discovery.type=single-node__  
+Cluster à un seul nœud : pas de découverte de pairs ni d'élection de maître ; les bootstrap checks de production sont assouplis
+__node.roles=cluster_manager,data,ingest,ml__  
+Le noeud cumule tous les rôles : gestion de l'état du cluster, stockage des shards, exécution des pipelines d'ingestion et des modèles ML 
+__OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g__  
+Tas de la JVM fixé à 1 Go ; Xms = Xmx évite les redimensionnements coûteux. La documentation recommande au plus 50 % de la RAM, le reste servant au cache de fichiers
+bootstrap.memory_lock=true + ulimits.memlock: -1
+Verrouille la mémoire de la JVM pour qu'elle ne parte pas en swap (performances)
+__healthcheck__  
+Toutes les 30s, interroge _cluster/health ; après 5 échecs, le conteneur est marqué unhealthy
+__depends_on: condition: service_healthy__  
+Dashboards et Logstash ne démarrent qu'une fois OpenSearch déclaré sain, pas seulement lancé
+
+La sécurité est désactivée afin qu'il n'y ai pas de certificats TLS à générer, pas d'authentification dans curl ni dans le notebook, accès direct en HTTP.  
+  
+Ne pas a faire en production car on a un mot de passe écrit en clair, toute personne peut se connecter et modifier les index, les échanges sont en clair. 
+
 ## Préparation de la machine
 
 OpenSearch a besoin d'un paramètre noyau plus élevé que la valeur par défaut :
@@ -105,21 +127,47 @@ Documentation utile : https://docs.opensearch.org/latest/.
 
 ### INDEX et UPDATE API
 - (Question) Après avoir étudié la structure d’un document, ajouter un nouveau compte dont l’ID est 10001
+PUT bank/_doc/10001
+{"account_number":10001,"balance":1500,"firstname":"Damien","lastname":"Phan","age":25,"gender":"M","address":"1 Rue Test","employer":"UTLN","email":"damien@utln.fr","city":"Toulon","state":"FR"}
+
 - (Question) Mettre à jour le compte précédent en modifiant l’adresse
+POST bank/_update/10001
+{"doc": {"address": "2 Avenue de l'Université"}}
 
 ### DELETE API
 - (Question) Supprimer le compte précédemment créé
+DELETE bank/_doc/10001
 - (Question) Supprimer tous les comptes de la ville de Nicholson (Utiliser _delete_by_query)
+POST bank/_delete_by_query
+{"query": {"match": {"city": "Nicholson"}}}
 
 ### GET API
 - (Question) Obtenir le compte dont l’ID est 2
+GET bank/_doc/2
 - (Question) Idem mais récupérer uniquement le source (champs _source)
+GET bank/_source/2
 - (Question) Idem mais en ne sélectionnant que le nom et le prénom (firstname, lastname)
+GET bank/_source/2?_source_includes=firstname,lastname
 
 ### SEARCH API
 - (Question) Retrouver tous les comptes
+GET bank/_search
+{"query": {"match_all": {}}}
 - (Question) Retrouver tous les comptes dont la ville (champs city) est Belvoir
+GET bank/_search
+{"query": {"match": {"city": "Belvoir"}}}
 - (Question) Retrouver tous les comptes dont la ville (champs city) est Belvoir ET l’employeur Xurban
+GET bank/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {"match": {"city": "Belvoir"}},
+        {"match": {"employer": "Xurban"}}
+      ]
+    }
+  }
+}
 
 ## Visualisation des données avec OpenSearch Dashboards
 Avant de créer des visuels, déclarez l'index à OpenSearch Dashboards : menu `Dashboards Management` › `Index patterns` › `Create index pattern`, saisissez `bank`, puis validez.
@@ -127,13 +175,18 @@ Avant de créer des visuels, déclarez l'index à OpenSearch Dashboards : menu `
 Aller ensuite sur l’onglet Visualize et créer les visuels suivants :
 
 - (Question) Métrique affichant la somme des soldes de tous les comptes. Sauver le graphique.
+![alt text](image-1.png)
 - (Question) Graphique barre affichant la moyenne des soldes (champ balance) selon l’état (champ state). Sauver le graphique.
+![alt text](image-2.png)
 - (Question) Nuage de mots représentant les villes dans lesquelles il y a le plus de comptes. Sauver le graphique.
+![alt text](image-3.png)
 
 Rendez-vous ensuite sur l’onglet Dashboard puis : 
 
 - (Question) Réaliser un tableau de bord regroupant les 3 visuels précédents.
+![alt text](image-4.png)
 - (Question) Exécuter une requête dans la barre de recherche situé au dessus et remarquez que les visuels se mettent automatiquement à jour.
+![alt text](image-5.png)
 
 # Partie 2 - Gestion de documents textuels
 
